@@ -158,8 +158,8 @@ RUN curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main
 # trivy - vulnerability scanner
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
-# checkov - IaC security scanner (via pip)
-RUN pip install --break-system-packages checkov
+# checkov - IaC security scanner (isolated via uv)
+RUN uv tool install checkov
 
 # ============================================
 # Pandoc (document format conversion)
