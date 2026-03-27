@@ -1,0 +1,28 @@
+# Sensitive files
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+node_modules/
+.cache/
+__pycache__/
+*.pyc
+.venv/
+
+# Version control
+.git/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local config
+config/
+data/

@@ -1,0 +1,81 @@
+services:
+  # ============================================
+  # Interactive Mode (default)
+  # Usage: docker compose run --rm claude-code
+  # ============================================
+  claude-code:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-code
+    stdin_open: true
+    tty: true
+
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GIT_USER_NAME=${GIT_USER_NAME:-}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-}
+      - CLAUDE_CODE_MODEL=${CLAUDE_CODE_MODEL:-}
+      - NODE_OPTIONS=--max-old-space-size=4096
+      # Cloud credentials (optional - or use volume mounts below)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-}
+
+    volumes:
+      # Persistent Claude Code config
+      - claude-config:/data/claude-config
+
+      # Project directories - customize these
+      # Option 1: Named volume (isolated)
+      - projects:/projects
+      # Option 2: Bind mount your repos (uncomment and customize)
+      # - ~/projects:/projects
+      # - ~/my-repo:/projects/my-repo
+
+      # Cloud credentials from host (uncomment as needed)
+      # - ~/.aws:/root/.aws:ro
+      # - ~/.azure:/root/.azure:ro
+      # - ~/.config/gcloud:/root/.config/gcloud:ro
+
+      # Custom configuration overrides (uncomment to use)
+      # - ./config:/config:ro
+
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+        reservations:
+          memory: 4G
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Default: launch claude interactively
+    command: ["claude"]
+
+  # ============================================
+  # Server Mode (background, long-running)
+  # Usage: docker compose --profile server up -d
+  # Then:  docker exec -it claude-code-server claude
+  # ============================================
+  claude-code-server:
+    extends:
+      service: claude-code
+    container_name: claude-code-server
+    profiles:
+      - server
+    # Override: stay alive instead of launching claude
+    command: ["sleep", "infinity"]
+    restart: unless-stopped
+
+volumes:
+  claude-config:
+    name: claude-code-config
+  projects:
+    name: claude-code-projects
